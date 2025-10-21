@@ -1,8 +1,8 @@
-
-import os
 import pandas as pd
 import streamlit as st
 from pathlib import Path
+import sys, os
+sys.path.append(os.path.dirname(__file__))
 from app.data_fetch import add_wow_stats
 
 st.set_page_config(page_title="Metals Dashboard", layout="wide")
