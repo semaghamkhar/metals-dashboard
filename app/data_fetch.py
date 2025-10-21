@@ -14,7 +14,21 @@ def fetch_yf(symbol: str, start: str = "2015-01-01", end: Optional[str] = None) 
     df = yf.download(symbol, start=start, end=end, progress=False)
     if df.empty:
         return pd.DataFrame()
-    df = df.reset_index()[["Date", "Close"]]
+    df = df.reset_index()
+    # Handle both single and multi-index column formats
+    if "Close" in df.columns:
+        df = df[["Date", "Close"]]
+    elif ("Close", symbol) in df.columns:
+        df = df[["Date", ("Close", symbol)]]
+        df.columns = ["Date", "Close"]
+    else:
+        # Flatten multi-index columns if present
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = ['_'.join(col).strip() if col[1] else col[0] for col in df.columns.values]
+        if "Close" in df.columns:
+            df = df[["Date", "Close"]]
+        else:
+            raise ValueError(f"Could not find Close column for {symbol}")
     df["Symbol"] = symbol
     return df
 
@@ -46,7 +60,10 @@ def weekly_snapshot(prices_df: pd.DataFrame) -> pd.DataFrame:
     out = []
     for sym, g in df.groupby("Symbol"):
         g = g.set_index("Date").sort_index()
-        w = g["Close"].resample("W-FRI").last().dropna().to_frame("Close").reset_index()
+        # Resample and get the last value for each week
+        w = g[["Close"]].resample("W-FRI").last().dropna()
+        w = w.reset_index()
+        w.columns = ["Date", "Close"]
         w["Symbol"] = sym
         out.append(w)
     return pd.concat(out, ignore_index=True) if out else pd.DataFrame()

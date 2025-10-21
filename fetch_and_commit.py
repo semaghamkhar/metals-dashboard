@@ -4,7 +4,8 @@ import sys
 from pathlib import Path
 import datetime as dt
 import pandas as pd
-from app.data_fetch import fetch_yf, weekly_snapshot, add_wow_stats
+sys.path.insert(0, str(Path(__file__).parent / "app"))
+from data_fetch import fetch_yf, weekly_snapshot, add_wow_stats
 
 DATA_DIR = Path("data")
 DATA_DIR.mkdir(parents=True, exist_ok=True)
