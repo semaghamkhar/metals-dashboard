@@ -3,7 +3,7 @@ import streamlit as st
 from pathlib import Path
 import sys, os
 sys.path.append(os.path.dirname(__file__))
-from app.data_fetch import add_wow_stats
+from data_fetch import add_wow_stats
 
 st.set_page_config(page_title="Metals Dashboard", layout="wide")
 
@@ -35,14 +35,14 @@ st.subheader("Latest snapshot")
 last_date = full["Date"].max().date().isoformat()
 latest = full[full["Date"] == full["Date"].max()][["Symbol", "Close", "WoW_%", "MoM_%"]]
 st.write(f"Week ending: **{last_date}**")
-st.dataframe(latest.style.format({"Close": "{:,.2f}", "WoW_%": "{:+.2f}", "MoM_%": "{:+.2f}"}), use_container_width=True)
+st.dataframe(latest.style.format({"Close": "{:,.2f}", "WoW_%": "{:+.2f}", "MoM_%": "{:+.2f}"}), width="stretch")
 
 tab1, tab2 = st.tabs(["Charts", "History Table"])
 
 with tab1:
     for sym in full["Symbol"].unique():
         sub = full[full["Symbol"] == sym]
-        st.line_chart(sub.set_index("Date")["Close"], height=220, use_container_width=True)
+        st.line_chart(sub.set_index("Date")["Close"], height=220, width="stretch")
         st.caption(f"{sym} – Close price history")
 with tab2:
-    st.dataframe(full.sort_values(["Symbol","Date"], ascending=[True, False]), use_container_width=True)
+    st.dataframe(full.sort_values(["Symbol","Date"], ascending=[True, False]), width="stretch")
